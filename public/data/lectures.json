@@ -1,0 +1,472 @@
+[
+  {
+    "id": "lecture-7",
+    "title": "Introduction to Large Language Models",
+    "session": "Session 7",
+    "description": "Today we will begin discussing larger language models, starting with GPT-3, now that we have covered pre-trained models like GPT-2 and BERT. We will focus on the unique abilities these larger models exhibit and the additional features they support. The main architecture remains the Transformer, so t...",
+    "duration": "51 min",
+    "videoUrl": "/video/Lecture-7.mp4",
+    "transcript": [
+      {
+        "time": "00:00 - 01:00",
+        "text": "Today we will begin discussing larger language models, starting with GPT-3, now that we have covered pre-trained models like GPT-2 and BERT. We will focus on the unique abilities these larger models exhibit and the additional features they support."
+      },
+      {
+        "time": "01:00 - 02:00",
+        "text": "The main architecture remains the Transformer, so there are no significant structural changes compared to previous models. The primary difference is that they are much larger and trained on massive datasets."
+      },
+      {
+        "time": "02:00 - 03:00",
+        "text": "Consequently, the training process becomes significantly more complicated; it is not something that can be done in a few days like with BERT or GPT-2. It takes months, involves many people, and represents a huge engineering challenge."
+      },
+      {
+        "time": "03:00 - 04:00",
+        "text": "If you look at the technical papers for GPT-4 or Gemini, the list of contributors often includes hundreds of names. It also requires substantial resources in terms of cost, GPUs, and computation time."
+      },
+      {
+        "time": "04:00 - 05:00",
+        "text": "For instance, DeepSeek is a very efficient model where the training cost was reportedly only six million dollars, which is considered very cheap, though exact costs for other closed-source models are often not revealed."
+      },
+      {
+        "time": "05:00 - 06:00",
+        "text": "In addition to their size, these models exhibit special characteristics known as emergent abilities. These are capabilities that were not explicitly programmed into the code."
+      },
+      {
+        "time": "06:00 - 07:00",
+        "text": "The models are trained for next-word prediction, but because they are so massive and trained on such vast data, they can perform tasks that are not necessarily NLP-focused."
+      },
+      {
+        "time": "07:00 - 08:00",
+        "text": "This includes reasoning tasks, math problems, word problems, general instruction following, using tools like web browsers, or even self-evaluation where they critique and improve their own responses."
+      },
+      {
+        "time": "08:00 - 09:00",
+        "text": "This is remarkable because initially, no one expected these models to have such abilities; the expectation was simply that they would become better at standard NLP tasks."
+      },
+      {
+        "time": "09:00 - 10:00",
+        "text": "A common question is where we draw the line for a \"Large\" Language Model. There is no strict definition, but people generally consider models above 10 billion parameters to be large."
+      },
+      {
+        "time": "10:00 - 11:00",
+        "text": "GPT-2, with 1.5 billion parameters, is not considered large by today's standards. Conversely, LLaMA has a 70-billion parameter version that is definitely an LLM, achieving performance close to GPT-3 or GPT-4."
+      },
+      {
+        "time": "11:00 - 12:00",
+        "text": "However, size is not the only factor, as the amount of training data is equally important. The domain is very dynamic, with top models changing frequently."
+      },
+      {
+        "time": "12:00 - 13:00",
+        "text": "Currently, models like GPT-5, Claude by Anthropic, and Gemini by Google are leading the field. These top models are generally closed-source. There are also open-weight models like LLaMA and Mistral."
+      },
+      {
+        "time": "13:00 - 14:00",
+        "text": "DeepSeek is an interesting case; they published details showing they use a Mixture of Experts (MoE) architecture with 671 billion parameters, but only 37 billion are activated during each prediction."
+      },
+      {
+        "time": "14:00 - 15:00",
+        "text": "However, there are discussions regarding DeepSeek and data privacy, as they are a Chinese company and subject to local regulations regarding data sharing, which causes some trust issues for users with private data."
+      },
+      {
+        "time": "15:00 - 16:00",
+        "text": "Nevertheless, for reasoning or math problems where privacy is less of a concern, it remains a powerful tool. Before diving into specific models, it is important to understand the observations made around 2020 regarding scaling laws."
+      },
+      {
+        "time": "16:00 - 17:00",
+        "text": "These are simple laws that predict the performance of an LLM based on model size, dataset size, and compute budget. These laws are significant because they allow us to predict performance without training a new model every time."
+      },
+      {
+        "time": "17:00 - 18:00",
+        "text": "Since all these models share the same Transformer architecture, their behavior is somewhat predictable. This concept is often referred to as Kaplan's Scaling Laws, named after the lead author of the OpenAI paper \"Scaling Laws for Neural Language Models.\""
+      },
+      {
+        "time": "18:00 - 19:00",
+        "text": "We consider three main variables: model size, dataset size, and compute budget. Model size is usually measured by the number of parameters, excluding the embedding layer."
+      },
+      {
+        "time": "19:00 - 20:00",
+        "text": "We exclude embeddings because they account for a large portion of parameters due to the vocabulary size, but they do not contribute to the model's reasoning capacity in the same way the attention layers do."
+      },
+      {
+        "time": "20:00 - 21:00",
+        "text": "Dataset size is measured in tokens, and compute budget is measured in floating-point operations, often expressed in PetaFLOP-days. The relationship between these variables and the test loss follows a power law."
+      },
+      {
+        "time": "21:00 - 22:00",
+        "text": "When plotted on a logarithmic scale, this relationship appears as a straight line. This indicates that we can consistently improve results by increasing the size of these factors. However, the laws also highlight the concept of diminishing returns."
+      },
+      {
+        "time": "22:00 - 23:00",
+        "text": "As the model gets larger, it becomes progressively harder to achieve the same level of performance improvement."
+      },
+      {
+        "time": "23:00 - 24:00",
+        "text": "For example, reducing the error rate by a small margin requires a significantly larger multiplication of parameters or data than it did when the model was smaller."
+      },
+      {
+        "time": "24:00 - 25:00",
+        "text": "We may be approaching limits on how much we can improve simply by scaling up, which suggests we need more efficient training approaches compared to human learning, which is far more data-efficient."
+      },
+      {
+        "time": "25:00 - 26:00",
+        "text": "The compute budget is measured in PF-days, where one PF-day represents the number of floating-point operations performed at a rate of one PetaFLOP per second over a day."
+      },
+      {
+        "time": "26:00 - 27:00",
+        "text": "This is roughly equivalent to eight NVIDIA V100 GPUs operating for a full day. This unit allows us to compare models regardless of the specific hardware or time taken, as it aggregates the total operations."
+      },
+      {
+        "time": "27:00 - 28:00",
+        "text": "Kaplan's laws imply that model size and dataset size must be increased in tandem to avoid overfitting. If you only increase the model size without increasing the data, or vice versa, performance will suffer."
+      },
+      {
+        "time": "28:00 - 29:00",
+        "text": "The analysis suggested that convergence is inefficient; it is better to stop training short of zero error and use the remaining budget to train a larger model or use more data."
+      },
+      {
+        "time": "29:00 - 30:00",
+        "text": "Motivated by these scaling laws, OpenAI developed GPT-3 in 2020. It was more than 100 times larger than GPT-2, jumping from 1.5 billion to 175 billion parameters."
+      },
+      {
+        "time": "30:00 - 31:00",
+        "text": "It was trained on a much larger dataset, validating the hypothesis that scaling up leads to dramatic improvements. GPT-3 proved that a larger size could achieve state-of-the-art results on many NLP tasks purely through pre-training, without fine-tuning."
+      },
+      {
+        "time": "31:00 - 32:00",
+        "text": "A major innovation of GPT-3 was In-Context Learning (ICL). This means that even after the pre-training is finished, the model can learn to perform new tasks during inference simply by seeing examples in the prompt."
+      },
+      {
+        "time": "32:00 - 33:00",
+        "text": "We call this the \"inner loop\" of learning, occurring within the forward pass, as opposed to the \"outer loop\" of stochastic gradient descent used during training."
+      },
+      {
+        "time": "33:00 - 34:00",
+        "text": "For instance, the pre-trained model might struggle with complex arithmetic, but if you show it five examples of three-digit addition in the prompt, it learns the pattern and answers correctly."
+      },
+      {
+        "time": "34:00 - 35:00",
+        "text": "We distinguish between three types of in-context learning based on the number of examples provided."
+      },
+      {
+        "time": "35:00 - 36:00",
+        "text": "Zero-shot learning provides no examples, only a task description, such as \"Translate English to French.\" This is called \"eliciting\" capabilities because we are exposing an ability hidden within the weights rather than teaching it from scratch."
+      },
+      {
+        "time": "36:00 - 37:00",
+        "text": "One-shot learning provides a single example, and few-shot learning provides a small set, usually between five and ten."
+      },
+      {
+        "time": "37:00 - 38:00",
+        "text": "This approach is much simpler and more efficient than traditional fine-tuning because it does not require updating weights or maintaining separate models for different tasks. However, for very complex tasks, fine-tuning might still yield better results."
+      },
+      {
+        "time": "38:00 - 39:00",
+        "text": "Regarding architecture, GPT-3 uses sparse attention. In the original Transformer, the attention mechanism has a quadratic complexity ($N^2$) because every token attends to every other token."
+      },
+      {
+        "time": "39:00 - 40:00",
+        "text": "As context sizes grow from 500 to 2,000 or even 100,000 tokens, this becomes a major bottleneck for memory and computation. Sparse attention solves this by having tokens attend only to a subset of other tokens based on specific patterns."
+      },
+      {
+        "time": "40:00 - 41:00",
+        "text": "This reduces the complexity to roughly $N\\sqrt{N}$, allowing models to scale to hundreds of layers."
+      },
+      {
+        "time": "41:00 - 42:00",
+        "text": "While there is a slight theoretical loss in quality compared to full attention, the resources saved allow for a larger overall model, which usually results in a net performance gain."
+      },
+      {
+        "time": "42:00 - 43:00",
+        "text": "For training data, GPT-3 moved beyond just books and Wikipedia to include the Common Crawl, a massive dataset of web pages. While web data is generally lower quality than curated books, it provides a vast amount of world knowledge."
+      },
+      {
+        "time": "43:00 - 44:00",
+        "text": "To balance quality, high-quality datasets like Wikipedia are sampled more frequently during training. Despite its success, GPT-3 had limitations."
+      },
+      {
+        "time": "44:00 - 45:00",
+        "text": "It could be biased, inconsistent, and its performance was highly sensitive to the exact phrasing of the prompt—a challenge that gave rise to the field of prompt engineering. Additionally, it was not released as open-source but rather via an API."
+      },
+      {
+        "time": "45:00 - 46:00",
+        "text": "When using the OpenAI API, especially for chat models, we format inputs as a list of messages with roles: System, User, and Assistant. The \"System\" role sets the behavior of the model."
+      },
+      {
+        "time": "46:00 - 47:00",
+        "text": "We must provide the entire conversation history in every API call because the HTTP service is stateless; the model has no memory of previous interactions unless they are re-sent in the context window."
+      },
+      {
+        "time": "47:00 - 48:00",
+        "text": "Finally, as models like GPT-3 reached near-human performance on standard benchmarks like SuperGLUE, researchers needed harder tests. This led to the creation of the MMLU (Massive Multitask Language Understanding) benchmark."
+      },
+      {
+        "time": "48:00 - 49:00",
+        "text": "MMLU covers 57 subjects including STEM, humanities, and social sciences, ranging from elementary to professional levels. While GPT-4 has achieved around 87% accuracy on MMLU, and Gemini has broken the 90% threshold, these numbers often rely on few-shot prompting techniques."
+      },
+      {
+        "time": "49:00 - 50:00",
+        "text": "To keep pushing the field, newer benchmarks like MMLU-Pro have been introduced, increasing the difficulty by removing easy questions and expanding the multiple-choice options from four to ten to reduce random guessing success."
+      },
+      {
+        "time": "50:00 - 51:00",
+        "text": "Next, we will discuss updated scaling laws known as Chinchilla laws and the phases of the LLM lifecycle."
+      }
+    ],
+    "notes": "Key Topics Covered:\n- Total segments: 51\n- Duration: 51:00\n- Detailed transcript available in segments"
+  },
+  {
+    "id": "lecture-10",
+    "title": "Fine-Tuning Large Language Models",
+    "session": "Session 10",
+    "description": "So today, we'll talk about fine-tuning LLMs. We already discussed fine-tuning language models previously. We even had some homework to use Hugging Face to find, you know, a summarization BERT model, or T5. But when working with large models, we need to use more efficient techniques. Because they are...",
+    "duration": "61 min",
+    "videoUrl": "/video/Lecture-10.mp4",
+    "transcript": [
+      {
+        "time": "00:00 - 01:00",
+        "text": "So today, we'll talk about fine-tuning LLMs. We already discussed fine-tuning language models previously. We even had some homework to use Hugging Face to find, you know, a summarization BERT model, or T5."
+      },
+      {
+        "time": "01:00 - 02:00",
+        "text": "But when working with large models, we need to use more efficient techniques. Because they are very large, it will take a very long time to adjust the weights."
+      },
+      {
+        "time": "02:00 - 03:00",
+        "text": "So there is a whole family of techniques called PEFT—Parameter-Efficient Fine-Tuning—that we'll discuss today. Okay, so as a reminder, we usually have two stages of training when working with LLMs."
+      },
+      {
+        "time": "03:00 - 04:00",
+        "text": "So we have the pre-training where we use a large unlabeled dataset. Here, we just need to predict the next word, and this is very computationally demanding. It requires a lot of resources. Then we have an option."
+      },
+      {
+        "time": "04:00 - 05:00",
+        "text": "If the LLM is good enough, in some cases, we can just use prompt engineering to adjust it to our needs. Right?"
+      },
+      {
+        "time": "05:00 - 06:00",
+        "text": "But in more complex tasks, or if I want to deliver them for more specific domains where there was not much data in the pre-training, then you'll need to keep training the model or fine-tune it for specific datasets or tasks."
+      },
+      {
+        "time": "06:00 - 07:00",
+        "text": "Otherwise, your result will not be optimal, right? So, we have another stage of fine-tuning, where we use labeled datasets."
+      },
+      {
+        "time": "07:00 - 08:00",
+        "text": "It's smaller, similar to traditional machine learning models, where we have a labeled dataset and the LLM needs to predict the labels. There are many ways to do it; we'll discuss today different ways."
+      },
+      {
+        "time": "08:00 - 09:00",
+        "text": "We can use only one dataset, we can use many. We can do it with different techniques like PEFT, which I mentioned. This process is much less computationally demanding."
+      },
+      {
+        "time": "09:00 - 10:00",
+        "text": "It shouldn't take more than a few days, depending on the model, and depending on how much data you want to use."
+      },
+      {
+        "time": "10:00 - 11:00",
+        "text": "Although we mentioned that prompt engineering can be very powerful, and people come up with heuristics like the Chain-of-Thought or the Tree of Thoughts, at some point, you might hit a wall and see that it's not enough to get the desired results."
+      },
+      {
+        "time": "11:00 - 12:00",
+        "text": "Also, there are some other issues with in-context learning that might limit your application. First of all, it uses space in the context window, right?"
+      },
+      {
+        "time": "12:00 - 13:00",
+        "text": "Especially if we use examples with all the chain of thoughts, they occupy a lot of space in the prompt. So with fine-tuning, we reduce the need for using a context length."
+      },
+      {
+        "time": "13:00 - 14:00",
+        "text": "Also, if you compare one-to-one, even a large model with only prompt engineering or in-context learning against a much smaller model that was fine-tuned on this specific domain or task, the smaller model usually will have better results."
+      },
+      {
+        "time": "14:00 - 15:00",
+        "text": "For example, GPT-3 175 billion, with only few-shot performance on SuperGLUE, performs 17.5% below a much smaller model, T5, that was fine-tuned on these specific tasks."
+      },
+      {
+        "time": "15:00 - 16:00",
+        "text": "Which makes sense, because fine-tuning is much more powerful than just using the prompt to adjust it."
+      },
+      {
+        "time": "16:00 - 17:00",
+        "text": "Another problem is that if you don't have in-context learning, so you just use the model as is—what we call zero-shot performance—then most of the models, even if they're large ones, they will not perform so well on tasks like arithmetic reasoning or problem solving."
+      },
+      {
+        "time": "17:00 - 18:00",
+        "text": "Because in the pre-training, they were trying to predict the next word."
+      },
+      {
+        "time": "18:00 - 19:00",
+        "text": "For example, in PaLM, which is a very large model, if you present some task which is a very simple question, in many cases, it will just repeat the question, or just write some unrelated stuff, because it doesn't understand instructions."
+      },
+      {
+        "time": "19:00 - 20:00",
+        "text": "It just tries to complete the sequence. Okay, so, like I said, there are many types of fine-tuning. We can use a single task or multi-task fine-tuning."
+      },
+      {
+        "time": "20:00 - 21:00",
+        "text": "We can fine-tune for instruction following, or for alignment with human values, which we'll talk about in another lecture. The most simple approach is called Supervised Fine-Tuning (SFT). Which is very similar to traditional deep learning or machine learning."
+      },
+      {
+        "time": "21:00 - 22:00",
+        "text": "We just updated the parameters of the network to predict the labels of some datasets, right? However, we need to be careful when we use this approach."
+      },
+      {
+        "time": "22:00 - 23:00",
+        "text": "It can work well with small models, like BERT, but if you try to do it on something like GPT, it's not a good idea to just give it a labeled dataset."
+      },
+      {
+        "time": "23:00 - 24:00",
+        "text": "What's the problem of training, let's say, a large model on next-word prediction and then giving it a label dataset? Even if we fine-tune it with the labeled data, since it's pre-trained on next-word prediction, it might not work well."
+      },
+      {
+        "time": "24:00 - 25:00",
+        "text": "First of all, the model will not understand that you need to predict a label. Right? It will still try to complete the sentence."
+      },
+      {
+        "time": "25:00 - 26:00",
+        "text": "Like, if you have sentiment analysis, it will just continue your sentence instead of saying \"positive\" or \"negative\". Also, it might compromise the performance of other tasks."
+      },
+      {
+        "time": "26:00 - 27:00",
+        "text": "Because now it will start giving labels in the output instead of using its pre-trained knowledge. Because you override the weights of the network, right? So it might interfere with the general ability to complete sentences."
+      },
+      {
+        "time": "27:00 - 28:00",
+        "text": "In BERT, it's less of a problem, because BERT during its pre-training also learns to label and uses the CLS token. But for most LLMs, we use a different approach."
+      },
+      {
+        "time": "28:00 - 29:00",
+        "text": "We need to make sure that even when we fine-tune on a labeled dataset, we keep the same format of question/answer or prompt/completion. This is called Instruction Tuning. The idea is very simple."
+      },
+      {
+        "time": "29:00 - 30:00",
+        "text": "Even if we have a classical NLP task, like sentiment analysis, we wrap each example with some template and we show it to the model like it's instructions."
+      },
+      {
+        "time": "30:00 - 31:00",
+        "text": "So, instead of just showing the sentence or the review, we start with some instruction like \"Classify this review.\" And usually, we also translate the label—instead of just 0 or 1—to some natural language text, like \"Positive\" or \"Negative.\" This is similar to how the model understands pre-training."
+      },
+      {
+        "time": "31:00 - 32:00",
+        "text": "We call this a prompt/completion pair, where the input is the prompt and the completion is the label."
+      },
+      {
+        "time": "32:00 - 33:00",
+        "text": "What's interesting in instruction tuning is that, in addition to making the model better on this specific task, over time, it becomes more generally capable to answer questions in general. It understands better how to follow instructions."
+      },
+      {
+        "time": "33:00 - 34:00",
+        "text": "So, if you use this fine-tuning on more than one task, the model becomes better and better in general at answering questions. Even on a new task that was not part of the fine-tuning, it will give you better results."
+      },
+      {
+        "time": "34:00 - 35:00",
+        "text": "This approach combines supervised fine-tuning and prompt engineering. To define the dataset for the tuning, we use prompt engineering techniques to formulate the examples. Okay, so, as I said, there are two approaches."
+      },
+      {
+        "time": "35:00 - 36:00",
+        "text": "You can fine-tune it only on one single task. The advantage is you can get very good results with a small number of examples."
+      },
+      {
+        "time": "36:00 - 37:00",
+        "text": "But the drawbacks are that you will need to store a copy of the model for each task, and it can lead to catastrophic forgetting."
+      },
+      {
+        "time": "37:00 - 38:00",
+        "text": "Catastrophic forgetting is where, if you fine-tune too much on one task, it will start becoming worse on the general task of language modeling."
+      },
+      {
+        "time": "38:00 - 39:00",
+        "text": "For example, instead of answering \"What is the name of the cat?\", it just thinks it's a sentiment analysis task and says \"The garden was positive.\" That's why a more general approach, which improves the model instruction following on many tasks and doesn't have this problem of catastrophic forgetting, is called Multi-Task Instruction Tuning."
+      },
+      {
+        "time": "39:00 - 40:00",
+        "text": "We instruct the model on a large number of tasks at the same time. One of the foundational papers that suggested this approach is called FLAN. They took a LaMDA model, and in their case they compared to GPT-3."
+      },
+      {
+        "time": "40:00 - 41:00",
+        "text": "They took 62 NLP tasks—like common sense reasoning, translation, sentiment analysis—and fine-tuned the model on these tasks together with the instructions."
+      },
+      {
+        "time": "41:00 - 42:00",
+        "text": "Their observation was that the model became much better even on tasks that were not part of the fine-tuning, which are called held-out tasks. The model gains some general ability to understand instructions."
+      },
+      {
+        "time": "42:00 - 43:00",
+        "text": "If we compare the fine-tuned model (FLAN) to GPT-3 without fine-tuning (only few-shot in-context learning), FLAN is better. A follow-up paper used the same approach but took it to a much larger size."
+      },
+      {
+        "time": "43:00 - 44:00",
+        "text": "This paper is called Scaling Instruction-Finetuned Language Models, leading to Flan-T5 and Flan-PaLM. Flan-T5 is a T5 model, but it was fine-tuned on something like 1,800 tasks with 15 million instructions. They also incorporated Chain-of-Thought (CoT) prompting during the fine-tuning."
+      },
+      {
+        "time": "44:00 - 45:00",
+        "text": "They tried two different architectures: T5 and PaLM. The goal was to show that by fine-tuning on a diverse array of tasks, the model becomes much better at answering questions in general."
+      },
+      {
+        "time": "45:00 - 46:00",
+        "text": "Regarding scaling, they showed that when you use this large number of tasks, even small models can benefit from instruction tuning. For example, Flan-T5-XL (3B parameters) achieved a better MMLU score than GPT-3 (175B)."
+      },
+      {
+        "time": "46:00 - 47:00",
+        "text": "However, for very small models, instruction tuning might degrade performance because they have less capacity and might suffer from forgetting. There are three types of datasets people use for instruction tuning."
+      },
+      {
+        "time": "47:00 - 48:00",
+        "text": "The first type is Formatting Task Datasets, which involves taking classical NLP datasets and formulating them as instructions. The second type is Synthetic Datasets, which uses LLMs to generate new examples."
+      },
+      {
+        "time": "48:00 - 49:00",
+        "text": "The third type is Daily Chat Data, which are datasets constructed from real user conversations like ShareGPT. One of the earliest datasets is PromptSource. They created a website where people were invited to add examples or instructions via crowdsourcing."
+      },
+      {
+        "time": "49:00 - 50:00",
+        "text": "They created a dataset called P3 (Public Pool of Prompts) from this platform. Nowadays, people move towards more automatic approaches, like Self-Instruct. The idea is simple: Start from 175 seed tasks annotated by humans."
+      },
+      {
+        "time": "50:00 - 51:00",
+        "text": "Then, invoke an LLM (like GPT-3) to generate new instructions based on these examples. They found it beneficial to identify classification tasks versus non-classification tasks. For classification, they wanted to ensure coverage of all class labels."
+      },
+      {
+        "time": "51:00 - 52:00",
+        "text": "They used Input-First or Output-First generation. They filtered low-quality data using similarity measures like ROUGE to ensure diversity. Using this, they generated about 52,000 instructions."
+      },
+      {
+        "time": "52:00 - 53:00",
+        "text": "They showed that by using GPT-3 to generate instructions and then fine-tuning GPT-3 on them, the model became much better at instruction following. A similar approach was used with the LLaMA model."
+      },
+      {
+        "time": "53:00 - 54:00",
+        "text": "Stanford researchers took 175 seed tasks, generated 52,000 instructions using text-davinci-003 (GPT-3.5), and used this dataset to fine-tune a LLaMA 7B model. This model is called Alpaca. It was very cheap to train, taking only 3 hours on 8 GPUs."
+      },
+      {
+        "time": "54:00 - 55:00",
+        "text": "The third type is chat data. Vicuna is an open-source chatbot fine-tuned from LLaMA using 70,000 ShareGPT dialogues. It achieved 90% capability of ChatGPT. They also used GPT-4 as a judge to evaluate the responses. Another approach is WizardLM."
+      },
+      {
+        "time": "55:00 - 56:00",
+        "text": "It uses an evolution-like approach called Evol-Instruct to control diversity and complexity. They iteratively prompt an LLM to rewrite instructions to be more complex (In-Depth Evolving) or more diverse (In-Breadth Evolving). A survey paper compared these datasets."
+      },
+      {
+        "time": "56:00 - 57:00",
+        "text": "Models trained on chat data like ShareGPT became much better at chat. However, using a mixture is often best. Increasing complexity and diversity, like in WizardLM, improves performance more than just increasing the number of instructions. Finally, we discuss PEFT."
+      },
+      {
+        "time": "57:00 - 58:00",
+        "text": "Fine-tuning all parameters is expensive. PEFT methods only update a small number of parameters. These include Adapter Tuning, which adds small adapter layers, and Prompt Tuning or Prefix Tuning, which adds trainable vectors to the input or layers."
+      },
+      {
+        "time": "58:00 - 59:00",
+        "text": "We also have LoRA, or Low-Rank Adaptation, which injects trainable low-rank matrices ($A$ and $B$) into the linear layers while freezing the original weights."
+      },
+      {
+        "time": "59:00 - 60:00",
+        "text": "This reduces the trainable parameters by a huge amount, for example an 86% reduction, while maintaining performance. We can use the Hugging Face PEFT library to implement these."
+      },
+      {
+        "time": "60:00 - 61:00",
+        "text": "You define a PeftConfig (e.g., LoraConfig), wrap your base model with get_peft_model, and train using the standard Trainer API. Okay, I think we'll stop today at this point."
+      }
+    ],
+    "notes": "Key Topics Covered:\n- Total segments: 61\n- Duration: 61:00\n- Detailed transcript available in segments"
+  }
+]

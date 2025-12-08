@@ -1,0 +1,293 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+.eggs/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Python Virtual Environments
+
+venv/
+env/
+ENV/
+.venv/
+virtualenv/
+.venv
+venv.bak/
+env.bak/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+*.env
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.cache/
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Chroma DB
+chroma_db/
+backend/chroma_db/
+*.chroma/
+
+# Vector Databases
+*.faiss/
+*.index/
+vectorstore/
+
+# Logs
+*.log
+logs/
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# Data
+docs/
+backend/data/
+public/video/
+public/uploads/
+uploads/
+media/
+static/uploads/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+dump.rdb
+*.rdb
+
+# Redis
+redis_data/
+*.rdb
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# Testing
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+coverage/
+*.cover
+.hypothesis/
+test-results/
+junit.xml
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+*.save
+*.swp
+*.swo
+*~
+.cache/
+
+# Secrets and keys
+*.pem
+*.key
+*.cert
+*.crt
+secrets/
+.secrets/
+*.secret
+config/secrets.yml
+config/secrets.yaml
+
+# Generated files
+*.generated.*
+.generated/
+generated/
+
+# Package manager
+package-lock.json.backup
+yarn.lock.backup
+pnpm-lock.yaml.backup
+
+# TypeScript
+*.tsbuildinfo
+
+# Vite
+.vite/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# pyenv
+.python-version
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# ML/AI model files (large files)
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.joblib
+*.pt
+*.pth
+*.onnx
+*.pb
+models/
+checkpoints/
+weights/
+*.weights
+
+# Large media files (uncomment if you don't want to track videos/images)
+# *.mp4
+# *.avi
+# *.mov
+# *.mkv
+# *.webm
+# *.flv
+# *.wmv
+# *.pdf
+# *.zip
+# *.tar
+# *.tar.gz
+# *.rar
+# *.7z
+
+# Archive files
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.rar
+*.7z
+*.gz
+*.bz2
+*.xz
+
+# Compiled files
+*.class
+*.dll
+*.exe
+*.o
+*.a
+*.lib
+*.so
+*.dylib
+
+# Profiling data
+*.prof
+*.lprof
+.profraw
+
+# Local configuration
+config.local.*
+settings.local.*
+local_settings.py
+local_config.py
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+site/
+
+# Misc
+*.orig
+*.rej
+.directory
+.Trash-*
+.nfs*
+# Processed data outputs
+backend/data/processed_data/
+backend/data/examples/
+# Script outputs
+backend/scripts/preprocessing/*.json
+backend/scripts/preprocessing/*.txt
+# Pinecone-specific
+.pinecone/
+# LangChain/LangGraph cache
+.langchain/
+.langgraph/
+# OpenAI cache (if using langchain caching)
+.openai_cache/
+# Parquet files (evaluation results)
+*.parquet
+# Lecture-specific (if you don't want to track raw lecture data)
+backend/data/raw_data/lectures/
+backend/data/raw_data/papers/
+backend/data/raw_data/transcripts/
+backend/raw_transcripts.txt/
+# Frontend build artifacts (already have dist/, but also)
+.vite-cache/
+# Session data (if you add Redis or file-based sessions)
+flask_session/
+sessions/
+# Antigravity brain artifacts (development artifacts)
+.gemini/

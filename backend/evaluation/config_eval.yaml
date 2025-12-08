@@ -1,0 +1,42 @@
+# RAGAS Evaluation Configuration
+
+# Lecture and Paper Settings
+lectures:
+  - lecture-7
+  - lecture-10
+
+# Evaluation Settings
+evaluation:
+  # Test dataset path
+  testset_path: "evaluation/testsets/lecture_rag_validation.parquet"
+  
+  # Results path
+  results_path: "evaluation/results/lecture_rag_validation_results.parquet"
+  
+  # Metrics output path
+  metrics_path: "evaluation/results/lecture_rag_validation_ragas_metrics.parquet"
+  
+  # Number of test queries
+  num_queries: 10
+  
+  # Pinecone namespaces to evaluate
+  namespaces:
+    - slides
+    - papers
+    - transcript
+
+# LLM Configuration for RAGAS
+llm:
+  model: "gpt-4o-mini"  # Changed from gpt-4o-mini for better JSON compliance
+  temperature: 0.0
+
+# Embeddings Configuration for RAGAS
+embeddings:
+  model: "text-embedding-3-large"
+
+# RAGAS Metrics to Calculate
+metrics:
+  - faithfulness
+  - answer_relevancy
+  - context_recall
+  - context_precision

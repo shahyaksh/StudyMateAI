@@ -1,0 +1,53 @@
+# Test Queries for RAGAS Evaluation
+# Each query includes: question, ground_truth answer, query_type, and expected_namespaces
+
+queries:
+  - question: "What is instruction tuning and how does it improve large language models?"
+    ground_truth: "Instruction tuning is a supervised learning technique that fine-tunes pre-trained language models on instruction-completion pairs. It improves LLMs by enhancing their ability to follow specific NLP instructions and respond appropriately to unseen tasks, making them more useful and controllable."
+    query_type: "lecture_content"
+    expected_namespaces: ["slides", "transcript"]
+    
+  - question: "Explain the Chinchilla scaling law and its implications for model training."
+    ground_truth: "The Chinchilla scaling law states that for optimal performance, the data size should be approximately 20 times the number of model parameters. This implies that many large models are undertrained and could achieve better performance with more training data rather than just increasing model size."
+    query_type: "lecture_content"
+    expected_namespaces: ["slides", "papers"]
+    
+  - question: "What are emergent abilities in large language models?"
+    ground_truth: "Emergent abilities are capabilities that arise unexpectedly when models reach certain sizes, involving sharp performance leaps rather than gradual improvements. These abilities are not present in smaller models but suddenly appear at scale, representing qualitative changes in model capability."
+    query_type: "lecture_content"
+    expected_namespaces: ["slides", "transcript"]
+    
+  - question: "How does GPT-3 implement in-context learning?"
+    ground_truth: "GPT-3 implements in-context learning by using examples provided in the prompt as context to adapt to tasks without parameter updates. The model learns from the few-shot examples in the input and applies that pattern to generate appropriate responses for new instances."
+    query_type: "lecture_content"
+    expected_namespaces: ["slides", "papers"]
+    
+  - question: "What is the difference between parameter-efficient fine-tuning (PEFT) and full fine-tuning?"
+    ground_truth: "PEFT methods adapt large pretrained models by updating only a small subset of parameters or adding minimal trainable parameters, making adaptation efficient and cost-effective. Full fine-tuning updates all model parameters, requiring significantly more computational resources and memory."
+    query_type: "lecture_content"
+    expected_namespaces: ["slides"]
+    
+  - question: "Describe the MMLU benchmark and what it measures."
+    ground_truth: "MMLU (Massive Multitask Language Understanding) is a benchmark consisting of 15,908 questions across 57 subjects spanning STEM, humanities, social sciences, and more. It measures a model's multitask accuracy and knowledge across diverse domains, testing both breadth and depth of understanding."
+    query_type: "lecture_content"
+    expected_namespaces: ["slides"]
+    
+  - question: "What are the key components of the attention mechanism in transformers?"
+    ground_truth: "The attention mechanism in transformers consists of queries (Q), keys (K), and values (V) matrices. It computes attention scores by taking the dot product of queries and keys, applies softmax to get attention weights, and uses these weights to create a weighted sum of values, allowing the model to focus on relevant parts of the input."
+    query_type: "paper_content"
+    expected_namespaces: ["papers"]
+    
+  - question: "How do scaling laws relate to compute, model size, and data size?"
+    ground_truth: "Scaling laws describe power law relationships between compute budget, model size, data size, and model performance (loss). They show that these factors are interdependent, and optimal performance requires balanced scaling of all three. Kaplan's laws established these relationships, while Chinchilla refined them to emphasize data scaling."
+    query_type: "mixed"
+    expected_namespaces: ["slides", "papers"]
+    
+  - question: "What is the role of the cross-entropy loss function in instruction tuning?"
+    ground_truth: "The cross-entropy loss function in instruction tuning measures the difference between the model's predicted output distribution and the true labels (instruction completions). It guides the model's weight updates during training to minimize this difference, improving the model's ability to generate appropriate responses to instructions."
+    query_type: "lecture_content"
+    expected_namespaces: ["slides", "transcript"]
+    
+  - question: "Compare zero-shot, few-shot, and fine-tuned model performance."
+    ground_truth: "Zero-shot learning uses no examples, relying on the model's pretrained knowledge. Few-shot learning provides a small number of examples in the prompt for in-context learning. Fine-tuning updates model parameters on task-specific data. Generally, fine-tuned models perform best, followed by few-shot, then zero-shot, though this gap narrows with larger models and better prompting."
+    query_type: "mixed"
+    expected_namespaces: ["slides", "transcript", "papers"]

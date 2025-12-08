@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lecture-rag-backend
+    ports:
+      - "5001:5000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME:-lecture-rag-index}
+      - PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT:-us-east-1}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-3-large}
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
+      - FLASK_ENV=production
+      - PORT=5000
+    volumes:
+      - ./backend/data:/app/data
+      - ./backend/config:/app/config
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - lecture-rag-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lecture-rag-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - lecture-rag-network
+
+networks:
+  lecture-rag-network:
+    driver: bridge
+
+volumes:
+  backend-data:
+    driver: local
