@@ -8,16 +8,16 @@ lectures:
 # Evaluation Settings
 evaluation:
   # Test dataset path
-  testset_path: "evaluation/testsets/lecture_rag_validation.parquet"
+  testset_path: "evaluation/testsets/lecture_rag_evaluation.parquet"
   
   # Results path
-  results_path: "evaluation/results/lecture_rag_validation_results.parquet"
+  results_path: "evaluation/results/lecture_rag_evaluation_results.parquet"
   
   # Metrics output path
-  metrics_path: "evaluation/results/lecture_rag_validation_ragas_metrics.parquet"
+  metrics_path: "evaluation/results/lecture_rag_evaluation_ragas_metrics.parquet"
   
   # Number of test queries
-  num_queries: 10
+  num_queries: 20
   
   # Pinecone namespaces to evaluate
   namespaces:

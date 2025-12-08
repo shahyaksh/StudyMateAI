@@ -16,7 +16,9 @@ from ragas.metrics import Faithfulness, AnswerRelevancy, ContextRecall, ContextP
 from pathlib import Path
 import sys
 import os
+import json
 import logging
+from datetime import datetime
 from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 
@@ -118,13 +120,11 @@ def run_ragas_evaluation(dataset: Dataset, config: dict):
         model=config['embeddings']['model'],
         openai_api_key=OPENAI_API_KEY
     )
-    
-    # Configure metrics using recommended approach from RAGAS team
-    # Reference: https://github.com/explodinggradients/ragas/issues/2473
+
     metrics_to_run = [
-        AnswerRelevancy(llm=llm, embeddings=embeddings, strictness=1),  # strictness=1 reduces complexity
+        AnswerRelevancy(llm=llm, embeddings=embeddings, strictness=1), 
         Faithfulness(llm=llm),
-        ContextRecall(llm=llm),  # Use ContextRecall from collections (not LLMContextRecall)
+        ContextRecall(llm=llm), 
         ContextPrecision(llm=llm),
     ]
     
@@ -158,6 +158,117 @@ def save_metrics(result, output_path: str):
     logger.info(f"✅ Saved RAGAS metrics to: {output_file}")
     
     return df_result
+
+
+def save_metrics_to_json(df_metrics: pd.DataFrame, config: dict, output_dir: str):
+    """
+    Save RAGAS metrics to a structured JSON file.
+    
+    Args:
+        df_metrics: DataFrame containing RAGAS metrics
+        config: Configuration dict
+        output_dir: Directory to save JSON file
+    """
+    output_path = Path(output_dir) / "results" / "ragas_scores.json"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Get numeric columns (the actual metrics)
+    numeric_cols = df_metrics.select_dtypes(include=['float64', 'int64']).columns
+    
+    # Calculate metric statistics
+    metrics_data = {}
+    for metric in numeric_cols:
+        mean_val = float(df_metrics[metric].mean())
+        metrics_data[metric] = {
+            "score": round(mean_val, 2),
+            "description": get_metric_description(metric),
+            "interpretation": get_metric_interpretation(metric, mean_val)
+        }
+    
+    # Identify strengths and areas for improvement
+    strengths = []
+    improvements = []
+    
+    for metric, data in metrics_data.items():
+        if data["score"] >= 0.95:
+            strengths.append(f"{metric.replace('_', ' ').title()}: {data['score']:.2f} - {data['interpretation']}")
+        elif data["score"] < 0.90:
+            improvements.append(f"{metric.replace('_', ' ').title()} could be optimized (current: {data['score']:.2f})")
+    
+    # Build JSON structure
+    json_data = {
+        "evaluation_metadata": {
+            "framework": "RAGAS",
+            "model": config['llm']['model'],
+            "embedding_model": config['embeddings']['model'],
+            "test_queries": len(df_metrics),
+            "evaluation_date": datetime.now().strftime("%Y-%m-%d"),
+            "dataset": "Lecture Transcripts + Research Papers"
+        },
+        "metrics": metrics_data,
+        "summary": {
+            "overall_performance": get_overall_performance(metrics_data),
+            "key_strengths": strengths if strengths else ["All metrics performing well"],
+            "areas_for_improvement": improvements if improvements else ["System performing optimally"]
+        },
+        "system_configuration": {
+            "retrieval_method": "Hybrid (Dense Vector + Metadata Filtering)",
+            "vector_database": "Pinecone",
+            "embedding_dimensions": 3072,
+            "chunk_size": 500,
+            "top_k_retrieval": 5,
+            "agent_architecture": "Multi-Agent (Supervisor-Worker Pattern)"
+        }
+    }
+    
+    # Save to JSON
+    with open(output_path, 'w') as f:
+        json.dump(json_data, f, indent=2)
+    
+    logger.info(f"✅ Saved JSON metrics to: {output_path}")
+    return output_path
+
+
+def get_metric_description(metric_name: str) -> str:
+    """Get description for a metric."""
+    descriptions = {
+        "faithfulness": "Measures factual consistency with source material",
+        "answer_relevancy": "Measures how relevant answers are to the questions",
+        "context_recall": "Measures if all relevant information was retrieved",
+        "context_precision": "Measures ranking quality of retrieved contexts"
+    }
+    return descriptions.get(metric_name, "Performance metric")
+
+
+def get_metric_interpretation(metric_name: str, score: float) -> str:
+    """Get interpretation for a metric score."""
+    if score >= 0.95:
+        return "Excellent - Outstanding performance"
+    elif score >= 0.90:
+        return "Very Good - Strong performance"
+    elif score >= 0.80:
+        return "Good - Solid performance"
+    elif score >= 0.70:
+        return "Fair - Acceptable performance"
+    else:
+        return "Needs Improvement"
+
+
+def get_overall_performance(metrics_data: dict) -> str:
+    """Determine overall performance based on all metrics."""
+    avg_score = sum(m["score"] for m in metrics_data.values()) / len(metrics_data)
+    
+    if avg_score >= 0.95:
+        return "Excellent"
+    elif avg_score >= 0.90:
+        return "Very Good"
+    elif avg_score >= 0.80:
+        return "Good"
+    elif avg_score >= 0.70:
+        return "Fair"
+    else:
+        return "Needs Improvement"
+
 
 
 def print_metrics_summary(df_metrics: pd.DataFrame):
@@ -221,10 +332,14 @@ def main():
     # Save metrics
     df_metrics = save_metrics(result, str(metrics_path))
     
+    # Save metrics to JSON
+    json_path = save_metrics_to_json(df_metrics, config, str(current_dir))
+    
     # Print summary
     print_metrics_summary(df_metrics)
     
     print(f"\nDetailed metrics saved to: {metrics_path}")
+    print(f"JSON metrics saved to: {json_path}")
     print("="*60)
 
 

@@ -1,0 +1,51 @@
+{
+  "evaluation_metadata": {
+    "framework": "RAGAS",
+    "model": "gpt-4o-mini",
+    "embedding_model": "text-embedding-3-large",
+    "test_queries": 20,
+    "evaluation_date": "2025-12-08",
+    "dataset": "Lecture Transcripts + Research Papers"
+  },
+  "metrics": {
+    "answer_relevancy": {
+      "score": 0.86,
+      "description": "Measures how relevant answers are to the questions",
+      "interpretation": "Good - Solid performance"
+    },
+    "faithfulness": {
+      "score": 0.41,
+      "description": "Measures factual consistency with source material",
+      "interpretation": "Needs Improvement"
+    },
+    "context_recall": {
+      "score": 0.75,
+      "description": "Measures if all relevant information was retrieved",
+      "interpretation": "Fair - Acceptable performance"
+    },
+    "context_precision": {
+      "score": 0.93,
+      "description": "Measures ranking quality of retrieved contexts",
+      "interpretation": "Very Good - Strong performance"
+    }
+  },
+  "summary": {
+    "overall_performance": "Fair",
+    "key_strengths": [
+      "All metrics performing well"
+    ],
+    "areas_for_improvement": [
+      "Answer Relevancy could be optimized (current: 0.86)",
+      "Faithfulness could be optimized (current: 0.41)",
+      "Context Recall could be optimized (current: 0.75)"
+    ]
+  },
+  "system_configuration": {
+    "retrieval_method": "Hybrid (Dense Vector + Metadata Filtering)",
+    "vector_database": "Pinecone",
+    "embedding_dimensions": 3072,
+    "chunk_size": 500,
+    "top_k_retrieval": 5,
+    "agent_architecture": "Multi-Agent (Supervisor-Worker Pattern)"
+  }
+}

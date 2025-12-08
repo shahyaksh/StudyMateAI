@@ -4,41 +4,41 @@
 
 This evaluation framework assesses the quality of the Lecture RAG system using RAGAS (Retrieval Augmented Generation Assessment) metrics. It evaluates both retrieval quality and answer generation across lecture content (slides + transcripts) and research papers.
 
-## Current Implementation Results
-
 ### Performance Metrics
 
-Based on evaluation with 10 test queries across lecture content and research papers:
+Based on evaluation with **20 test queries** across lecture content and research papers:
 
 | Metric | Mean Score | Std Dev | Min | Max | Interpretation |
 |--------|-----------|---------|-----|-----|----------------|
-| **Answer Relevancy** | **0.93** | 0.09 | 0.76 | 1.00 | ✅ Excellent - Answers directly address questions |
-| **Faithfulness** | **1.00** | 0.00 | 1.00 | 1.00 | ✅ Perfect - No hallucinations detected |
-| **Context Recall** | **1.00** | 0.00 | 1.00 | 1.00 | ✅ Perfect - All ground truth retrieved |
-| **Context Precision** | **0.86** | 0.38 | 0.00 | 1.00 | ✅ Very Good - Relevant contexts ranked highly |
+| **Answer Relevancy** | **0.86** | 0.22 | 0.00 | 1.00 | ✅ Good - Answers generally address questions well |
+| **Faithfulness** | **0.41** | 0.18 | 0.28 | 0.54 | ⚠️ Needs Improvement - Some hallucinations detected |
+| **Context Recall** | **0.75** | N/A | 0.75 | 0.75 | ✅ Fair - Most ground truth retrieved |
+| **Context Precision** | **0.93** | 0.27 | 0.00 | 1.00 | ✅ Very Good - Relevant contexts ranked highly |
 
 ### Key Findings
 
 **Strengths:**
-- ✅ **Perfect Faithfulness (1.00)**: The system never hallucinates - all answers are fully grounded in retrieved context
-- ✅ **Perfect Context Recall (1.00)**: Ground truth information is consistently retrieved from the knowledge base
-- ✅ **Excellent Answer Relevancy (0.93)**: Answers are highly relevant and directly address user questions
-- ✅ **Strong Context Precision (0.86)**: Relevant contexts are prioritized effectively in retrieval
+- ✅ **Excellent Context Precision (0.93)**: Relevant contexts are consistently prioritized in retrieval
+- ✅ **Good Answer Relevancy (0.86)**: Answers generally address user questions appropriately
+- ✅ **Fair Context Recall (0.75)**: Most ground truth information is retrieved from the knowledge base
 
 **Areas for Improvement:**
-- Context Precision variance (one query scored 0.0) - investigate edge cases
+- ⚠️ **Faithfulness (0.41)**: System shows tendency to add information beyond retrieved context
+  - Need to strengthen grounding constraints in prompts
+  - Review agent instructions to emphasize strict adherence to source material
+- Answer Relevancy variance - some queries scored 0.0, indicating edge cases
 - Fine-tune retrieval parameters for consistent precision across all query types
 
 ### Test Coverage
 
 The evaluation includes:
-- **7 Lecture Content Queries**: Questions about slides and transcripts
+- **12 Lecture Content Queries**: Questions about slides and transcripts
+- **6 Paper Content Queries**: Research paper-specific questions
 - **2 Mixed Queries**: Questions requiring both lecture and paper content
-- **1 Paper Content Query**: Research paper-specific question
 
 ### System Performance
 
-- **Success Rate**: 100% (10/10 queries processed successfully)
+- **Success Rate**: 100% (20/20 queries processed successfully)
 - **Average Response Time**: 2-4 seconds per query
 - **Agent Routing Accuracy**: 100% correct intent classification
 - **Average Contexts Retrieved**: 3-6 per query
@@ -62,10 +62,11 @@ backend/evaluation/
 ├── ragas_eval_wrapper.py         # Step 3: Calculate RAGAS metrics
 ├── README.md                     # This file
 ├── testsets/                     # Generated test datasets
-│   └── lecture_rag_validation.parquet
+│   └── lecture_rag_evaluation.parquet
 └── results/                      # Evaluation results
-    ├── lecture_rag_validation_results.parquet
-    └── lecture_rag_validation_ragas_metrics.parquet
+    ├── lecture_rag_evaluation_results.parquet
+    ├── lecture_rag_evaluation_ragas_metrics.parquet
+    └── ragas_scores.json
 ```
 
 ## Setup
@@ -105,9 +106,9 @@ cd backend/evaluation
 python generate_test_queries.py
 ```
 
-**Output**: `testsets/lecture_rag_validation.parquet`
+**Output**: `testsets/lecture_rag_evaluation.parquet`
 
-This creates a dataset with 10 test queries covering:
+This creates a dataset with 20 test queries covering:
 - Lecture content questions (slides + transcript)
 - Research paper questions
 - Mixed queries requiring multiple sources
@@ -120,7 +121,7 @@ Execute the agent on all test queries and capture results:
 python agent_evaluation_runner.py
 ```
 
-**Output**: `results/lecture_rag_validation_results.parquet`
+**Output**: `results/lecture_rag_evaluation_results.parquet`
 
 This script:
 - Runs each query through the agent workflow
@@ -129,7 +130,7 @@ This script:
 - Records agent routing decisions (intent, agents called)
 - Saves results with ground truth for comparison
 
-**Expected Runtime**: ~2-5 minutes for 10 queries (depending on API latency)
+**Expected Runtime**: ~5-10 minutes for 20 queries (depending on API latency)
 
 ### Step 3: Calculate RAGAS Metrics
 
@@ -139,7 +140,9 @@ Evaluate the results using RAGAS metrics:
 python ragas_eval_wrapper.py
 ```
 
-**Output**: `results/lecture_rag_validation_ragas_metrics.parquet`
+**Outputs**: 
+- `results/lecture_rag_evaluation_ragas_metrics.parquet`
+- `results/ragas_scores.json`
 
 This script:
 - Loads agent evaluation results
@@ -178,7 +181,7 @@ This script:
 import pandas as pd
 
 # View detailed metrics per query
-df = pd.read_parquet('results/lecture_rag_validation_ragas_metrics.parquet')
+df = pd.read_parquet('results/lecture_rag_evaluation_ragas_metrics.parquet')
 print(df[['user_input', 'faithfulness', 'answer_relevancy', 'context_recall', 'context_precision']])
 
 # View overall statistics

@@ -7,7 +7,7 @@ queries:
     query_type: "lecture_content"
     expected_namespaces: ["slides", "transcript"]
     
-  - question: "Explain the Chinchilla scaling law and its implications for model training."
+  - question: "Explain the Chinchilla scaling law and its implications for model training"
     ground_truth: "The Chinchilla scaling law states that for optimal performance, the data size should be approximately 20 times the number of model parameters. This implies that many large models are undertrained and could achieve better performance with more training data rather than just increasing model size."
     query_type: "lecture_content"
     expected_namespaces: ["slides", "papers"]
@@ -51,3 +51,53 @@ queries:
     ground_truth: "Zero-shot learning uses no examples, relying on the model's pretrained knowledge. Few-shot learning provides a small number of examples in the prompt for in-context learning. Fine-tuning updates model parameters on task-specific data. Generally, fine-tuned models perform best, followed by few-shot, then zero-shot, though this gap narrows with larger models and better prompting."
     query_type: "mixed"
     expected_namespaces: ["slides", "transcript", "papers"]
+
+  - question: "How does prompt ensembling work in the context of Prompt Tuning, and what advantage does it offer over model ensembling in the paper?"
+    ground_truth: "Prompt ensembling involves training multiple soft prompts for the same task using a single frozen language model. During inference, a single forward pass is executed with a batch size of N (replicating the example across the batch with different prompts) to aggregate predictions. This is more efficient than standard model ensembling because it avoids the high storage and inference costs of maintaining N distinct copies of the entire model."
+    query_type: "paper_content"
+    expected_namespaces: ["papers"]
+
+  - question: "How does P-Tuning v2 differ from previous methods like Lester et al. (2021) to achieve universality across model scales and tasks in the paper?"
+    ground_truth: "P-Tuning v2 implements 'Deep Prompt Tuning,' where trainable continuous prompts are added to every layer of the transformer architecture as prefix tokens, rather than just the input layer. This multi-layer approach increases the capacity of task-specific parameters and allows prompts to have a more direct impact on model predictions, enabling the method to match fine-tuning performance even on smaller models (under 10B parameters) and hard sequence labeling tasks."
+    query_type: "paper_content"
+    expected_namespaces: ["papers"]
+
+  - question: "What is the core mechanism of Prefix-Tuning for conditional generation tasks in the paper?"
+    ground_truth: "Prefix-Tuning prepends a sequence of continuous, trainable task-specific vectors (the prefix) to the input of a generative model (like GPT-2 or BART). The original model parameters are kept frozen, and the transformer attends to the prefix as if it were a sequence of 'virtual tokens.' This allows the model to be steered for specific tasks while optimizing only a small set of parameters (typically around 0.1%)."
+    query_type: "paper_content"
+    expected_namespaces: ["papers"]
+
+  - question: "How does Low-Rank Adaptation (LoRA) achieve efficient adaptation without introducing inference latency in the paper?"
+    ground_truth: "LoRA freezes the pre-trained model weights and injects trainable rank decomposition matrices (A and B) into the layers, representing the weight update as ΔW = BA (where the rank r is very small). Because the adaptation is linear, the trained matrices can be merged with the frozen weights (W = W0 + BA) during deployment. This ensures that the inference architecture remains identical to the original model, introducing zero additional latency."
+    query_type: "paper_content"
+    expected_namespaces: ["papers"]
+
+  - question: "Why is the 'span corruption' pre-training objective considered ill-suited for Prompt Tuning in T5 models, and what solution is proposed in the paper?"
+    ground_truth: "The 'span corruption' objective trains models to predict masked spans using sentinel tokens, which results in a model that has never processed truly natural input text or produced natural targets. This makes the frozen model difficult to control via prompts alone. The proposed solution is 'LM Adaptation,' where the T5 model undergoes a short period of additional training on a standard language modeling objective (generating natural text continuations) to make it more amenable to prompting."
+    query_type: "paper_content"
+    expected_namespaces: ["papers"]
+
+  - question: "How does the Evol-Instruct methodology in WizardLM differ from standard instruction generation?"
+    ground_truth: "Evol-Instruct goes beyond simple generation by iteratively evolving instructions to increase their complexity and diversity. It employs 'In-Depth Evolving' (adding constraints, increasing reasoning depth, complicating inputs) and 'In-Breadth Evolving' (creating completely new topics) to generate more challenging training data compared to standard methods."
+    query_type: "lecture_content"
+    expected_namespaces: ["slides"]
+
+  - question: "What are the key steps in the Self-Instruct pipeline for generating synthetic instruction data?"
+    ground_truth: "The Self-Instruct pipeline starts with a small seed of human-annotated instructions. It then prompts a large language model to generate new instructions and corresponding input-output pairs based on these seeds. Finally, it applies a filtering step to remove low-quality or highly similar instructions before adding them to the training pool."
+    query_type: "lecture_content"
+    expected_namespaces: ["slides"]
+
+  - question: "Describe the architecture and performance of the MAM Adapter within the unified PEFT framework."
+    ground_truth: "The MAM (Mix-and-Match) Adapter combines prefix tuning (with a small bottleneck dimension) at the attention layers and scaled parallel adapters (with a larger dimension) at the feed-forward layers. It achieves the best performance among PEFT methods, matching full fine-tuning results while only updating approximately 6.7% of the pre-trained parameters."
+    query_type: "lecture_content"
+    expected_namespaces: ["slides"]
+
+  - question: "How does Adapter Tuning modify the architecture of a Transformer layer for efficient fine-tuning?"
+    ground_truth: "Adapter Tuning inserts small bottleneck modules after the self-attention and feed-forward layers within a Transformer. Each adapter compresses the input feature vector into a lower dimension, applies a non-linearity, and then projects it back to the original dimension, allowing the model to adapt to new tasks while keeping the original pre-trained weights frozen."
+    query_type: "lecture_content"
+    expected_namespaces: ["slides"]
+
+  - question: "According to scaling laws, how does model size influence the effectiveness of instruction tuning?"
+    ground_truth: "Scaling laws suggest that instruction tuning is primarily beneficial for larger models. For smaller models (typically below 8 billion parameters), instruction tuning can actually hurt performance on held-out tasks, possibly because the model's limited capacity becomes saturated by learning the specific tuning tasks."
+    query_type: "lecture_content"
+    expected_namespaces: ["slides"]

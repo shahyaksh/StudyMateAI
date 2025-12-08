@@ -277,8 +277,7 @@ backend/scripts/preprocessing/*.txt
 .langgraph/
 # OpenAI cache (if using langchain caching)
 .openai_cache/
-# Parquet files (evaluation results)
-*.parquet
+
 # Lecture-specific (if you don't want to track raw lecture data)
 backend/data/raw_data/lectures/
 backend/data/raw_data/papers/
