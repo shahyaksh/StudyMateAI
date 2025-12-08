@@ -102,12 +102,60 @@ src/
 
 ## Setup
 
-### Prerequisites
+You can run the application using either **Docker** (recommended for production and full-stack deployment) or **local development** (recommended for frontend development with hot reload).
 
+### Option 1: Docker (Recommended for Production/Full Stack)
+
+**Prerequisites:**
+- Docker and Docker Compose installed
+- `.env` file with required API keys (see root directory)
+
+**Quick Start:**
+
+```bash
+# Run entire application (frontend + backend)
+docker-compose up --build
+
+# Or run in detached mode
+docker-compose up -d --build
+```
+
+**Access:**
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:5001`
+
+**Advantages:**
+- ✅ Complete stack with one command
+- ✅ Production-ready environment
+- ✅ Consistent across different machines
+- ✅ Isolated dependencies
+- ✅ Easy deployment
+
+**Docker Commands:**
+
+```bash
+# Stop containers
+docker-compose down
+
+# View logs
+docker-compose logs -f
+
+# Rebuild after code changes
+docker-compose up --build
+
+# Remove containers and volumes
+docker-compose down -v
+```
+
+---
+
+### Option 2: Local Development (Recommended for Frontend Development)
+
+**Prerequisites:**
 - Node.js 18+ and npm
 - Backend server running (see `backend/README.md`)
 
-### Installation
+**Installation:**
 
 1. **Install dependencies**:
    ```bash
@@ -130,7 +178,13 @@ src/
 
    Application will be available at `http://localhost:3000`
 
-### Production Build
+**Advantages:**
+- ✅ Hot Module Replacement (instant updates)
+- ✅ Faster iteration cycle
+- ✅ Better debugging with source maps
+- ✅ Direct access to Vite dev tools
+
+**Production Build:**
 
 ```bash
 # Build for production
