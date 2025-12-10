@@ -322,14 +322,57 @@ Agent prompts are defined in `../config/prompts.yaml`. Each agent has:
 
 ## Performance Metrics
 
+### RAGAS Evaluation Results
+
 Based on RAGAS evaluation (see `../evaluation/README.md`):
 
 | Metric | Score | Interpretation |
 |--------|-------|----------------|
-| **Answer Relevancy** | 0.93 | Excellent - Answers directly address questions |
-| **Faithfulness** | 1.00 | Perfect - No hallucinations |
-| **Context Recall** | 1.00 | Perfect - All ground truth retrieved |
-| **Context Precision** | 0.86 | Very Good - Relevant contexts ranked highly |
+| **Answer Relevancy** | 0.86 | Very Good - Answers directly address questions |
+| **Faithfulness** | 0.41 | Moderate - Some hallucinations, needs improvement |
+| **Context Recall** | 0.75 | Good - Most ground truth retrieved |
+| **Context Precision** | 0.93 | Excellent - Relevant contexts ranked highly |
+
+### Latency Analysis
+
+Comprehensive latency tracking was implemented using **Langfuse** to monitor agent performance at a granular level. The following metrics are based on 17 traced requests across all agents.
+
+#### Agent Latency Distribution (p95 Percentiles)
+
+| Agent | p50 Latency | p95 Latency | p99 Latency | Complexity |
+|-------|-------------|-------------|-------------|------------|
+| **metadata_agent** | 0.604s | 0.612s | 0.613s | Low - Simple enrichment |
+| **supervisor_agent** | 1.937s | 3.103s | 3.358s | Moderate - Intent classification |
+| **slides_agent** | 7.773s | 9.445s | 9.594s | High - Retrieval + generation |
+| **paper_agent** | 8.573s | 8.573s | 8.573s | High - Academic retrieval |
+| **flashcard_agent** | 13.974s | 13.974s | 13.974s | Very High - Multi-item generation |
+| **quiz_agent** | 37.841s | 37.841s | 37.841s | Very High - Complex generation |
+
+#### Key Insights
+
+**Fastest Agent**: The **metadata agent** (0.612s p95) demonstrates exceptional efficiency due to its focused task of query enrichment with transcript context.
+
+**Moderate Latency**: The **supervisor agent** (3.103s p95) shows reasonable overhead for intent classification, which is critical for routing accuracy.
+
+**Content Agents**: Both **slides_agent** (9.445s p95) and **paper_agent** (8.573s p95) exhibit consistent latency around 8-9 seconds, reflecting the combined cost of vector retrieval and LLM generation.
+
+**Generation-Intensive Agents**: The **quiz_agent** (37.841s) and **flashcard_agent** (13.974s) show the highest latency, justified by their complex multi-item generation tasks requiring extensive LLM processing.
+
+#### Cost Efficiency
+
+- **Total Cost**: $0.008026 for 17 requests
+- **Average Cost per Request**: $0.00047 (less than 1 cent)
+- **Total Tokens**: 42K tokens consumed
+- **Model**: GPT-4o-mini
+
+This exceptional cost efficiency makes the system viable for large-scale educational deployment.
+
+#### Performance Optimization Opportunities
+
+1. **Caching**: Implement response caching for frequently asked questions
+2. **Parallel Retrieval**: Optimize retrieval operations for slides and transcripts
+3. **Batch Generation**: For quiz/flashcard agents, consider batching similar requests
+4. **Streaming**: Implement streaming responses for better perceived latency
 
 ## Adding New Agents
 
