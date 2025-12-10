@@ -1,415 +1,404 @@
-# Multi-Agent System Architecture
+# Lecture RAG Backend
 
-This directory contains the implementation of specialized agents that work together to handle different types of queries and tasks.
+A sophisticated multi-agent system built with LangGraph for intelligent lecture content interaction. The system uses Retrieval Augmented Generation (RAG) to answer questions from lecture slides, transcripts, and research papers, while also generating quizzes and flashcards.
 
-## Agent Workflow
+## Table of Contents
 
-The system uses a **LangGraph workflow** with conditional routing between agents:
+- [Features](#features)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Setup](#setup)
+- [API Endpoints](#api-endpoints)
+- [Configuration](#configuration)
+- [Development](#development)
 
-```mermaid
-graph TD
-    Start([User Query]) --> Supervisor[Supervisor Agent<br/>Intent Classification]
-    
-    Supervisor -->|irrelevant| Reject[Reject Query<br/>END]
-    Supervisor -->|paper| Paper[Paper Agent<br/>Research Papers]
-    Supervisor -->|quiz| Quiz[Quiz Agent<br/>Generate Quiz]
-    Supervisor -->|flashcard| Flashcard[Flashcard Agent<br/>Generate Flashcards]
-    Supervisor -->|slide/general| Metadata[Metadata Agent<br/>Context Enrichment]
-    
-    Metadata --> Slides[Slides Agent<br/>Lecture Content]
-    
-    Paper --> Response([Response])
-    Quiz --> Response
-    Flashcard --> Response
-    Slides --> Response
-    
-    style Supervisor fill:#4A90E2,stroke:#2E5C8A,color:#fff
-    style Metadata fill:#50C878,stroke:#2E7D4E,color:#fff
-    style Slides fill:#9B59B6,stroke:#6C3483,color:#fff
-    style Paper fill:#E67E22,stroke:#A04000,color:#fff
-    style Quiz fill:#F39C12,stroke:#B9770E,color:#fff
-    style Flashcard fill:#1ABC9C,stroke:#117A65,color:#fff
-    style Reject fill:#E74C3C,stroke:#A93226,color:#fff
-    style Response fill:#2ECC71,stroke:#1E8449,color:#fff
+## Features
+
+- **Multi-Agent System**: Specialized agents for different content types and tasks
+- **Intelligent Routing**: Supervisor agent classifies intent and routes queries
+- **Context-Aware**: Maintains conversation history and enriches queries with temporal context
+- **Multiple Knowledge Sources**: Retrieves from slides, transcripts, and research papers
+- **Quiz Generation**: Creates multiple-choice quizzes from lecture content
+- **Flashcard Creation**: Generates study flashcards automatically
+- **Relevance Filtering**: Rejects queries unrelated to lecture content
+
+## Architecture
+
+The system uses a **LangGraph workflow** with conditional routing between specialized agents:
+
+```
+User Query → Supervisor Agent (Intent Classification)
+                    ↓
+        ┌───────────┼───────────┬──────────┬────────────┐
+        ↓           ↓           ↓          ↓            ↓
+   Irrelevant   Metadata    Paper     Quiz      Flashcard
+    (Reject)     Agent      Agent     Agent       Agent
+                    ↓
+               Slides Agent
+                    ↓
+               Response
 ```
 
-## Agent Descriptions
+See [agents/README.md](agents/README.md) for detailed workflow documentation.
 
-### 1. Supervisor Agent
+## Project Structure
 
-**File**: `supervisor_agent.py`
-
-**Purpose**: Entry point for all queries. Classifies intent and routes to appropriate specialized agent.
-
-**Responsibilities**:
-- Analyze user query to determine intent
-- Classify as: `paper`, `slide`, `quiz`, `flashcard`, `general`, or `irrelevant`
-- Detect and reject irrelevant queries (not about lecture content)
-- Determine which Pinecone namespaces to search
-- Route to appropriate agent
-
-**Key Features**:
-- Few-shot learning examples for better classification
-- Relevance detection to filter off-topic queries
-- JSON-structured output for routing decisions
-
-**Example Routing**:
-```python
-Query: "What is attention mechanism?"
-→ Intent: general
-→ Route: Metadata Agent → Slides Agent
-
-Query: "Explain the Transformer paper"
-→ Intent: paper
-→ Route: Paper Agent
-
-Query: "Generate a quiz on BERT"
-→ Intent: quiz
-→ Route: Quiz Agent
-
-Query: "What's the weather today?"
-→ Intent: irrelevant
-→ Route: END (rejected)
+```
+backend/
+├── app.py                      # Flask API server
+├── config.py                   # Configuration management
+├── requirements.txt            # Python dependencies
+├── Dockerfile                  # Docker configuration
+│
+├── agents/                     # Agent implementations
+│   ├── state.py               # Shared agent state
+│   ├── supervisor_agent.py    # Intent classification & routing
+│   ├── metadata_agent.py      # Context enrichment
+│   ├── slides_agent.py        # Slide content queries
+│   ├── paper_agent.py         # Research paper queries
+│   ├── quiz_agent.py          # Quiz generation
+│   └── flashcard_agent.py     # Flashcard generation
+│
+├── graph/                      # LangGraph workflow
+│   └── workflow.py            # Agent graph definition
+│
+├── services/                   # External services
+│   └── pinecone_service.py    # Vector database integration
+│
+├── utils/                      # Utilities
+│   ├── prompts.py             # Prompt templates
+│   ├── prompt_loader.py       # YAML prompt loader
+│   └── transcript_loader.py   # Transcript context retrieval
+│
+├── config/                     # Configuration files
+│   └── prompts.yaml           # Agent prompts
+│
+├── scripts/                    # Utility scripts
+│   ├── setup/                 # Setup scripts
+│   ├── indexing/              # Data indexing
+│   └── preprocessing/         # Data preprocessing
+│
+├── data/                       # Data storage
+│   ├── raw_data/              # Raw lecture materials
+│   ├── processed_data/        # Processed outputs
+│   └── examples/              # Example data
+│
+├── evaluation/                 # RAGAS evaluation framework
+│   └── README.md              # Evaluation documentation
+│
+└── notebooks/                  # Jupyter notebooks
 ```
 
-### 2. Metadata Agent
+## Setup
 
-**File**: `metadata_agent.py`
+### Prerequisites
 
-**Purpose**: Enriches queries with temporal context from lecture transcripts.
+- Python 3.11+
+- OpenAI API key
+- Pinecone account and API key
+- Pinecone index with namespaces: `slides`, `papers`, `transcript`
 
-**Responsibilities**:
-- Check if query is about "what professor is currently teaching"
-- Load transcript context around current timestamp
-- Enrich query with relevant transcript segments
-- Pass enriched query to Slides Agent
+### Installation
 
-**Key Features**:
-- Loads previous 2 + current transcript segments
-- Only enriches queries about current teaching
-- Passes through other queries unchanged
+1. **Clone and navigate to backend**:
+   ```bash
+   cd backend
+   ```
 
-**Example**:
-```python
-Query: "What is being discussed?"
-Timestamp: 120.5 seconds
-→ Loads transcript from 90-150 seconds
-→ Enriched: "The professor is discussing attention mechanisms..."
-→ Routes to Slides Agent
+2. **Create virtual environment**:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configure environment**:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your API keys
+   ```
+
+   Required variables:
+   ```ini
+   OPENAI_API_KEY=your_openai_api_key
+   PINECONE_API_KEY=your_pinecone_api_key
+   PINECONE_INDEX_NAME=lecture-rag-index
+   PINECONE_ENVIRONMENT=us-east-1
+   LLM_MODEL=gpt-4o-mini
+   EMBEDDING_MODEL=text-embedding-3-large
+   SECRET_KEY=your-secret-key
+   ```
+
+5. **Set up Pinecone index** (if not already created):
+   ```bash
+   python -m scripts.setup.setup_pinecone
+   ```
+
+6. **Index your data** (if not already indexed):
+   ```bash
+   python -m scripts.indexing.index_all
+   ```
+
+### Running the Server
+
+```bash
+python app.py
 ```
 
-### 3. Slides Agent
+Server will start on `http://localhost:5000`
 
-**File**: `slides_agent.py`
+## API Endpoints
 
-**Purpose**: Answers questions about lecture slides and content.
+### Health Check
 
-**Responsibilities**:
-- Retrieve relevant slides from Pinecone (`slides` namespace)
-- Generate answers referencing specific slides
-- Include slide numbers and titles in response
-- Handle both specific and general slide queries
-
-**Key Features**:
-- Multi-namespace search (slides + transcript)
-- Slide number and title citations
-- Formatted responses with references
-
-**Example Output**:
-```
-According to Slide 15 "Attention Mechanism":
-The attention mechanism allows the model to focus on...
-
-Referenced Slides:
-- Slide 15: Attention Mechanism
-- Slide 16: Multi-Head Attention
+```http
+GET /api/health
 ```
 
-### 4. Paper Agent
-
-**File**: `paper_agent.py`
-
-**Purpose**: Answers questions about research papers.
-
-**Responsibilities**:
-- Retrieve relevant paper sections from Pinecone (`papers` namespace)
-- Generate answers with proper citations
-- Include paper titles, authors, and page numbers
-- Handle technical paper-specific queries
-
-**Key Features**:
-- Academic citation format
-- Page number references
-- Author attribution
-
-**Example Output**:
-```
-According to "Attention Is All You Need" (Vaswani et al.):
-The Transformer architecture uses self-attention...
-
-Citations:
-- Vaswani et al., "Attention Is All You Need", Page 3
-```
-
-### 5. Quiz Agent
-
-**File**: `quiz_agent.py`
-
-**Purpose**: Generates multiple-choice quizzes from lecture content.
-
-**Responsibilities**:
-- Retrieve comprehensive slide content
-- Generate exam-appropriate questions
-- Create plausible distractors
-- Provide explanations for correct answers
-
-**Key Features**:
-- Multiple difficulty levels
-- Topic-based organization
-- Detailed explanations
-- JSON-structured output
-
-**Example Output**:
+**Response:**
 ```json
 {
-  "question": "What is the main advantage of self-attention?",
-  "options": {
-    "A": "Reduces model size",
-    "B": "Captures long-range dependencies",
-    "C": "Increases training speed",
-    "D": "Reduces memory usage"
-  },
-  "correct_answer": "B",
-  "explanation": "Self-attention allows the model to...",
-  "difficulty": "medium",
-  "topic": "Attention Mechanisms"
+  "status": "healthy",
+  "timestamp": "2024-12-08T12:00:00"
 }
 ```
 
-### 6. Flashcard Agent
+### Chat
 
-**File**: `flashcard_agent.py`
+Send queries to the multi-agent system.
 
-**Purpose**: Creates study flashcards from lecture content.
+```http
+POST /api/chat
+Content-Type: application/json
 
-**Responsibilities**:
-- Extract key concepts from slides
-- Generate question-answer pairs
-- Focus on important definitions and concepts
-- Create comprehensive coverage of topics
-
-**Key Features**:
-- Concise front/back format
-- Concept-focused questions
-- Comprehensive topic coverage
-
-**Example Output**:
-```json
 {
-  "front": "What is self-attention?",
-  "back": "A mechanism that allows each position in a sequence to attend to all positions in the previous layer"
+  "query": "What is instruction tuning?",
+  "timestamp": 120.5,           // Optional: video timestamp in seconds
+  "lecture_id": "lecture-7",    // Optional: lecture identifier
+  "session_id": "uuid"          // Optional: for conversation continuity
 }
 ```
 
-## Sample Q&A Scenarios
-
-### Scenario 1: Lecture Content Query
-
-**Q**: "What is instruction tuning and how does it improve LLMs?"
-
-**Workflow**:
-1. **Supervisor**: Classifies as `general` intent
-2. **Metadata**: Checks if about current teaching → No
-3. **Slides**: Retrieves slides on instruction tuning
-4. **Response**: Detailed answer with slide references
-
-**Sample Response**:
-```
-According to Slide 12 "Instruction Tuning":
-Instruction tuning is a technique to fine-tune language models on 
-instruction-following datasets. It improves LLMs by:
-1. Better task generalization
-2. Improved zero-shot performance
-3. More aligned with user intent
-
-Referenced Slides:
-- Slide 12: Instruction Tuning
-- Slide 13: FLAN and T0 Models
+**Response:**
+```json
+{
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "response": "Instruction tuning is a technique...",
+  "intent": "general",
+  "citations": [
+    {
+      "slide_number": 15,
+      "slide_title": "Instruction Tuning",
+      "content": "..."
+    }
+  ],
+  "metadata": {
+    "agents_called": ["supervisor_agent", "metadata_agent", "slides_agent"],
+    "num_contexts": 3
+  }
+}
 ```
 
-### Scenario 2: Research Paper Query
+**Intent Types:**
+- `general` - Slide/transcript queries
+- `paper` - Research paper queries
+- `quiz` - Quiz generation request
+- `flashcard` - Flashcard generation request
+- `irrelevant` - Query rejected (not lecture-related)
 
-**Q**: "Explain the Chinchilla scaling law"
+### Generate Quiz
 
-**Workflow**:
-1. **Supervisor**: Classifies as `paper` intent
-2. **Paper Agent**: Retrieves from Chinchilla paper
-3. **Response**: Answer with academic citations
+Create a multiple-choice quiz from lecture content.
 
-**Sample Response**:
-```
-According to "Training Compute-Optimal Large Language Models" 
-(Hoffmann et al., 2022):
+```http
+POST /api/quiz
+Content-Type: application/json
 
-The Chinchilla scaling law shows that for compute-optimal training,
-model size and training data should be scaled equally...
-
-Citations:
-- Hoffmann et al., "Training Compute-Optimal Large Language Models", Page 2
-```
-
-### Scenario 3: Quiz Generation
-
-**Q**: "Generate a quiz with 5 questions about transformers"
-
-**Workflow**:
-1. **Supervisor**: Classifies as `quiz` intent
-2. **Quiz Agent**: Retrieves transformer content, generates questions
-3. **Response**: JSON array of quiz questions
-
-### Scenario 4: Temporal Context Query
-
-**Q**: "What is the professor talking about?" (at timestamp 120s)
-
-**Workflow**:
-1. **Supervisor**: Classifies as `general` intent
-2. **Metadata**: Detects query about current teaching
-3. **Metadata**: Loads transcript context (90-150s)
-4. **Metadata**: Enriches query with transcript content
-5. **Slides**: Retrieves relevant slides
-6. **Response**: Answer based on current lecture segment
-
-### Scenario 5: Irrelevant Query
-
-**Q**: "What's the weather today?"
-
-**Workflow**:
-1. **Supervisor**: Classifies as `irrelevant`
-2. **END**: Rejects query with message
-
-**Response**:
-```
-I can't help with that. I'm designed to answer questions about 
-lecture content, slides, and research papers related to this course. 
-Please ask a question about the lecture material.
+{
+  "lecture_id": "lecture-7",
+  "num_questions": 5
+}
 ```
 
-## Agent State
-
-All agents share a common state defined in `state.py`:
-
-```python
-class AgentState(TypedDict):
-    current_query: str              # Original user query
-    enriched_query: str             # Query enriched with context
-    timestamp: Optional[float]      # Video timestamp
-    lecture_id: Optional[str]       # Lecture identifier
-    intent: str                     # Classified intent
-    target_namespaces: List[str]    # Pinecone namespaces to search
-    response: str                   # Generated response
-    citations: List[Dict]           # Source citations
-    metadata: Dict                  # Additional metadata
-    agent_history: List[str]        # Agents called in workflow
-    next_agent: Optional[str]       # Next agent to call
+**Response:**
+```json
+{
+  "quiz_questions": [
+    {
+      "question": "What is the main purpose of instruction tuning?",
+      "options": {
+        "A": "To reduce model size",
+        "B": "To improve model performance on specific tasks",
+        "C": "To increase training speed",
+        "D": "To reduce computational cost"
+      },
+      "correct_answer": "B",
+      "explanation": "Instruction tuning fine-tunes models...",
+      "difficulty": "medium",
+      "topic": "Instruction Tuning"
+    }
+  ]
+}
 ```
+
+### Generate Flashcards
+
+Create study flashcards from lecture content.
+
+```http
+POST /api/flashcards
+Content-Type: application/json
+
+{
+  "lecture_id": "lecture-7",
+  "num_cards": 10
+}
+```
+
+**Response:**
+```json
+{
+  "flashcards": [
+    {
+      "front": "What is instruction tuning?",
+      "back": "A technique to fine-tune language models..."
+    }
+  ]
+}
+```
+
+### Session Management
+
+```http
+GET /api/session/<session_id>
+```
+
+Get conversation history for a session.
+
+```http
+DELETE /api/session/<session_id>
+```
+
+Clear conversation history for a session.
 
 ## Configuration
 
-Agent prompts are defined in `../config/prompts.yaml`. Each agent has:
-- System prompt defining behavior
-- Few-shot examples (for Supervisor)
-- Output format specifications
+### LLM Model
 
-## Performance Metrics
+Edit `config.py` or set environment variable:
 
-### RAGAS Evaluation Results
+```python
+LLM_MODEL = "gpt-4o-mini"  # or "gpt-4o", "gpt-4-turbo"
+```
 
-Based on RAGAS evaluation (see `../evaluation/README.md`):
+### Embedding Model
 
-| Metric | Score | Interpretation |
-|--------|-------|----------------|
-| **Answer Relevancy** | 0.86 | Very Good - Answers directly address questions |
-| **Faithfulness** | 0.41 | Moderate - Some hallucinations, needs improvement |
-| **Context Recall** | 0.75 | Good - Most ground truth retrieved |
-| **Context Precision** | 0.93 | Excellent - Relevant contexts ranked highly |
+```python
+EMBEDDING_MODEL = "text-embedding-3-large"  # or "text-embedding-3-small"
+```
 
-### Latency Analysis
+### Prompts
 
-Comprehensive latency tracking was implemented using **Langfuse** to monitor agent performance at a granular level. The following metrics are based on 17 traced requests across all agents.
+Agent prompts are defined in `config/prompts.yaml`. Edit this file to customize agent behavior.
 
-#### Agent Latency Distribution (p95 Percentiles)
+### Pinecone Configuration
 
-| Agent | p50 Latency | p95 Latency | p99 Latency | Complexity |
-|-------|-------------|-------------|-------------|------------|
-| **metadata_agent** | 0.604s | 0.612s | 0.613s | Low - Simple enrichment |
-| **supervisor_agent** | 1.937s | 3.103s | 3.358s | Moderate - Intent classification |
-| **slides_agent** | 7.773s | 9.445s | 9.594s | High - Retrieval + generation |
-| **paper_agent** | 8.573s | 8.573s | 8.573s | High - Academic retrieval |
-| **flashcard_agent** | 13.974s | 13.974s | 13.974s | Very High - Multi-item generation |
-| **quiz_agent** | 37.841s | 37.841s | 37.841s | Very High - Complex generation |
+```python
+PINECONE_INDEX_NAME = "lecture-rag-index"
+PINECONE_ENVIRONMENT = "us-east-1"
+```
 
-#### Key Insights
+## Development
 
-**Fastest Agent**: The **metadata agent** (0.612s p95) demonstrates exceptional efficiency due to its focused task of query enrichment with transcript context.
+### Running Tests
 
-**Moderate Latency**: The **supervisor agent** (3.103s p95) shows reasonable overhead for intent classification, which is critical for routing accuracy.
+```bash
+# Run agent tests
+python test_agents.py
 
-**Content Agents**: Both **slides_agent** (9.445s p95) and **paper_agent** (8.573s p95) exhibit consistent latency around 8-9 seconds, reflecting the combined cost of vector retrieval and LLM generation.
+# Run evaluation
+cd evaluation
+python agent_evaluation_runner.py
+python ragas_eval_wrapper.py
+```
 
-**Generation-Intensive Agents**: The **quiz_agent** (37.841s) and **flashcard_agent** (13.974s) show the highest latency, justified by their complex multi-item generation tasks requiring extensive LLM processing.
+### Adding New Agents
 
-#### Cost Efficiency
+1. Create agent file in `agents/` directory
+2. Implement agent node function
+3. Add agent to `graph/workflow.py`
+4. Update routing logic in `route_after_supervisor()`
+5. Add prompts to `config/prompts.yaml`
 
-- **Total Cost**: $0.008026 for 17 requests
-- **Average Cost per Request**: $0.00047 (less than 1 cent)
-- **Total Tokens**: 42K tokens consumed
-- **Model**: GPT-4o-mini
+### Logging
 
-This exceptional cost efficiency makes the system viable for large-scale educational deployment.
+The system uses professional logging format:
 
-#### Performance Optimization Opportunities
+```
+[WORKFLOW] Starting Agent Workflow
+[SUPERVISOR] Detecting intent and routing...
+[METADATA] Checking if query is about current professor teaching...
+[SLIDES] Retrieving slide information...
+[WORKFLOW] Workflow Complete
+```
 
-1. **Caching**: Implement response caching for frequently asked questions
-2. **Parallel Retrieval**: Optimize retrieval operations for slides and transcripts
-3. **Batch Generation**: For quiz/flashcard agents, consider batching similar requests
-4. **Streaming**: Implement streaming responses for better perceived latency
+### Docker Deployment
 
-## Adding New Agents
+```bash
+# Build and run with Docker Compose
+docker-compose up --build
 
-1. **Create agent file**: `new_agent.py`
-2. **Implement node function**:
-   ```python
-   def new_agent_node(state: AgentState) -> Dict:
-       # Agent logic here
-       return {
-           "response": "...",
-           "agent_history": ["new_agent"],
-           "metadata": {...}
-       }
-   ```
-3. **Add to workflow**: Edit `../graph/workflow.py`
-4. **Update routing**: Modify `route_after_supervisor()`
-5. **Add prompts**: Update `../config/prompts.yaml`
+# Or build backend only
+docker build -t lecture-rag-backend .
+docker run -p 5000:5000 --env-file .env lecture-rag-backend
+```
+
+See [DOCKER_GUIDE.md](../DOCKER_GUIDE.md) for detailed Docker documentation.
 
 ## Troubleshooting
 
-### Agent not being called
-- Check intent classification in Supervisor logs
-- Verify routing logic in `workflow.py`
-- Review few-shot examples in `prompts.yaml`
+### "OPENAI_API_KEY not found"
+- Ensure `.env` file exists in backend directory
+- Verify API key is valid
 
-### Poor quality responses
-- Review agent prompts in `prompts.yaml`
-- Check retrieved contexts in Pinecone
-- Verify embedding model matches indexing
+### "Pinecone index not found"
+- Run `python -m scripts.setup.setup_pinecone`
+- Verify index name in `.env` matches Pinecone dashboard
 
-### Context not enriched
-- Ensure transcript data is indexed
-- Check timestamp is provided in query
-- Verify Metadata Agent logic
+### "No contexts retrieved"
+- Ensure data is indexed: `python -m scripts.indexing.index_all`
+- Check Pinecone index has vectors in correct namespaces
 
-## References
+### Agent not responding
+- Check Flask server logs for errors
+- Verify OpenAI API key has sufficient credits
+- Ensure Pinecone API key is valid
 
-- [LangGraph Documentation](https://python.langchain.com/docs/langgraph)
-- [LangChain Agents](https://python.langchain.com/docs/modules/agents/)
-- [RAGAS Evaluation](../evaluation/README.md)
+## Performance
+
+- **Average response time**: 2-4 seconds
+- **Quiz generation**: 10-15 seconds for 5 questions
+- **Flashcard generation**: 8-12 seconds for 10 cards
+- **Concurrent requests**: Supports multiple simultaneous users
+
+## Security
+
+- API keys stored in `.env` (never committed)
+- Session data stored in-memory (use Redis for production)
+- Input validation on all endpoints
+- CORS enabled for frontend integration
+
+## License
+
+MIT License
+
+## Support
+
+For issues or questions:
+1. Check [agents/README.md](agents/README.md) for workflow details
+2. Review [evaluation/README.md](evaluation/README.md) for evaluation
+3. See [scripts/README.md](scripts/README.md) for utility scripts
