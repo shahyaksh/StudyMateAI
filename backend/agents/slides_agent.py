@@ -15,9 +15,11 @@ from langchain_core.messages import SystemMessage
 from agents.state import AgentState
 from services.pinecone_service import get_pinecone_service
 from utils.prompts import SLIDES_AGENT_SYSTEM_PROMPT, format_context
+from utils.langfuse_tracking import track_agent
 from config import Config
 
 
+@track_agent("slides_agent")
 def slides_agent_node(state: AgentState) -> Dict:
     """
     Slides agent node for LangGraph workflow.
@@ -67,12 +69,21 @@ def slides_agent_node(state: AgentState) -> Dict:
     
     print(f"   Retrieved {len(context_docs)} relevant documents")
     
-    # Initialize LLM
+    # Get Langfuse callback handler for token tracking
+    from utils.langfuse_tracking import get_langfuse_callback_handler
+    callback_handler = get_langfuse_callback_handler(
+        trace_name="slides_agent",
+        session_id=state.get("session_id"),
+        metadata={"query": query, "num_docs": len(context_docs)}
+    )
+    
+    # Initialize LLM with callback for token tracking
     llm = ChatOpenAI(
         model=Config.LLM_MODEL,
         temperature=Config.LLM_TEMPERATURE,
         openai_api_key=Config.OPENAI_API_KEY,
-        max_tokens=Config.LLM_MAX_TOKENS
+        max_tokens=Config.LLM_MAX_TOKENS,
+        callbacks=[callback_handler]
     )
     
     # Format context

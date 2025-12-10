@@ -15,9 +15,11 @@ from langchain_core.messages import SystemMessage
 
 from agents.state import AgentState
 from utils.prompts import SUPERVISOR_AGENT_SYSTEM_PROMPT
+from utils.langfuse_tracking import track_agent
 from config import Config
 
 
+@track_agent("supervisor_agent")
 def supervisor_agent_node(state: AgentState) -> Dict:
     """
     Supervisor agent node for LangGraph workflow.
@@ -33,11 +35,20 @@ def supervisor_agent_node(state: AgentState) -> Dict:
     """
     print("[SUPERVISOR] Detecting intent and routing...")
     
-    # Initialize LLM
+    # Get Langfuse callback handler for token tracking
+    from utils.langfuse_tracking import get_langfuse_callback_handler
+    callback_handler = get_langfuse_callback_handler(
+        trace_name="supervisor_agent",
+        session_id=state.get("session_id"),
+        metadata={"query": state.get("current_query")}
+    )
+    
+    # Initialize LLM with Langfuse callback for automatic token tracking
     llm = ChatOpenAI(
         model=Config.LLM_MODEL,
         temperature=0.3,
-        openai_api_key=Config.OPENAI_API_KEY
+        openai_api_key=Config.OPENAI_API_KEY,
+        callbacks=[callback_handler]  # Enable token tracking
     )
     
     # Use enriched query if available, otherwise use original

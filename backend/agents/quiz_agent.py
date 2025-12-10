@@ -16,9 +16,11 @@ from langchain_core.messages import SystemMessage
 from agents.state import AgentState
 from services.pinecone_service import get_pinecone_service
 from utils.prompts import QUIZ_GENERATOR_SYSTEM_PROMPT, format_context
+from utils.langfuse_tracking import track_agent
 from config import Config
 
 
+@track_agent("quiz_agent")
 def quiz_agent_node(state: AgentState) -> Dict:
     """
     Quiz agent node for LangGraph workflow.
@@ -55,12 +57,21 @@ def quiz_agent_node(state: AgentState) -> Dict:
     # Get number of questions (default 10)
     num_questions = state.get("num_questions", 10)
     
-    # Initialize LLM
+    # Get Langfuse callback handler for token tracking
+    from utils.langfuse_tracking import get_langfuse_callback_handler
+    callback_handler = get_langfuse_callback_handler(
+        trace_name="quiz_agent",
+        session_id=state.get("session_id"),
+        metadata={"num_questions": num_questions, "num_slides": len(all_slides)}
+    )
+    
+    # Initialize LLM with callback for token tracking
     llm = ChatOpenAI(
         model=Config.LLM_MODEL,
         temperature=0.7,  # Slightly higher for creative question generation
         openai_api_key=Config.OPENAI_API_KEY,
-        max_tokens=4000  # More tokens for multiple questions
+        max_tokens=4000,  # More tokens for multiple questions
+        callbacks=[callback_handler]
     )
     
     # Create prompt

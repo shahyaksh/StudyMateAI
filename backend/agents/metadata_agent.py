@@ -15,9 +15,11 @@ from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from agents.state import AgentState
 from utils.prompts import METADATA_CURRENT_TEACHING_CHECK, METADATA_ENRICHMENT_PROMPT
 from utils.transcript_loader import get_transcript_context
+from utils.langfuse_tracking import track_agent
 from config import Config
 
 
+@track_agent("metadata_agent")
 def metadata_agent_node(state: AgentState) -> Dict:
     """
     Metadata agent node for LangGraph workflow.
@@ -35,11 +37,20 @@ def metadata_agent_node(state: AgentState) -> Dict:
     """
     print("[METADATA] Checking if query is about current professor teaching...")
     
-    # Initialize LLM
+    # Get Langfuse callback handler for token tracking
+    from utils.langfuse_tracking import get_langfuse_callback_handler
+    callback_handler = get_langfuse_callback_handler(
+        trace_name="metadata_agent",
+        session_id=state.get("session_id"),
+        metadata={"query": state.get("current_query")}
+    )
+    
+    # Initialize LLM with callback for token tracking
     llm = ChatOpenAI(
         model=Config.LLM_MODEL,
         temperature=0.3,
-        openai_api_key=Config.OPENAI_API_KEY
+        openai_api_key=Config.OPENAI_API_KEY,
+        callbacks=[callback_handler]
     )
     
     # Get transcript context if timestamp and lecture_id are provided
